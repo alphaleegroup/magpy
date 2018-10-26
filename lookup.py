@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 def construct_dict(feature):
-    with open('lookup-data/' + feature + '.txt') as f:
+    with open('tables/' + feature + '.txt') as f:
         d = dict(x.rstrip().split(None, 1) for x in f)
     return d
 
@@ -61,6 +61,7 @@ def collect_values(elements, weights, feature_list):
 
 
 def main():
+    print('I am not a run script, try magpy.py')
     pass
 
 

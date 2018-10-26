@@ -67,9 +67,7 @@ if __name__ == '__main__':
 
     df_list = []
     for i in range(len(a)):
-        df_list.append(collect_values(elements[i], weights[i], \
-            ['CovalentRadius', 'Polarizability', 'Electronegativity',
-             'FirstIonizationEnergy', 'ElectronAffinity']))
+        df_list.append(lookup(elements[i], weights[i], features='atomic'))
 
     df = pd.concat(df_list, keys=(x for x in range(len(df_list))))
     print(df)
