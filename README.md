@@ -4,7 +4,7 @@ This package has been written to to copy the behaviour of [MAGPIE](http://oqmd.o
 Example usage:
 
 ```
-from magpie import parse_input, look_up
+from magpy import parse_input, look_up
 
 input = ['NaCl', 'H2SO4', 'C2H4']
 elements, weights = parse_input(input)
