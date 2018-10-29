@@ -23,17 +23,24 @@
 from magpy import *
 
 
-def test(input_file):
-    compositions = load_file(input_file)
+def test(feature_file, composition_file):
+    features = load_file(feature_file)
+    compositions = load_file(composition_file)
     elements, weights = parse_input(compositions)
 
-    df = look_up(elements, weights, features='atomic')
-
+    df_list = look_up(elements, weights, features=features)
+    df = combine_dfs(df_list)
     print(df)
-    save_file(df)
+
+
+    stats_list = statistics(df_list, features)
+    stats = combine_dfs(stats_list)
+    print(stats)
 
     pass
 
 
 if __name__ == '__main__':
-    test(sys.path[0] + '/testinput.txt')
+    feature_file = sys.path[0] + '/featuretest.txt'
+    composition_file = sys.path[0] + '/compositiontest.txt'
+    test(feature_file, composition_file)

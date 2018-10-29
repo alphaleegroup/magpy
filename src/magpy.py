@@ -33,11 +33,15 @@ class FeatureError(Exception):
 
 def load_file(file):
     '''
-    load file and return a list, files should contain one composition per line
+    load file and return a list, files should contain one item per line
 
     example:    LaCu04
                 K2MgO4
                 NaCl
+
+    or:         CovalentRadius
+                Polarizability
+                Electronegativity
     '''
     with open(file) as f:
         compositions = f.read().splitlines()
@@ -45,8 +49,9 @@ def load_file(file):
 
 
 def save_file(df, output='output.csv'):
-    df.to_csv(output, header=True, index=True, index_label=['CompositionIndex', 'ElementIndex'])
-       
+    df.to_csv(output, header=True, index=True, index_label=[
+              'CompositionIndex', 'ElementIndex'])
+
 
 def parse_input(file):
     '''
@@ -57,7 +62,7 @@ def parse_input(file):
 
     this is done in two stages, first formatting to ensure weights 
     are explicate then parsing into sections:
-    
+
     example: BaCu3 -> Ba1Cu3
 
     example: Ba1Cu3 -> (Ba Cu) & (1 3)
@@ -84,77 +89,77 @@ def construct_dict(feature):
     '''
     construct dictionary from reference tables
     '''
-    with open(sys.path[0]+'/tables/' + feature + '.txt') as f:
+    with open(sys.path[0] + '/tables/' + feature + '.txt') as f:
         d = dict(x.rstrip().split(None, 1) for x in f)
-        
+
     return d
 
 
-def look_up(elements, weights, features='atomic'):
+def look_up(elements, weights, features=['atomic']):
     '''
     build a dataframe containing the elementwise results for desired features
     '''
     # ensure valid feature list
-    if features == 'atomic' or features == ['atomic']:
-        features = ['CovalentRadius', 
-                    'Polarizability', 
+    if features == ['atomic']:
+        features = ['CovalentRadius',
+                    'Polarizability',
                     'Electronegativity',
-                    'FirstIonizationEnergy', 
+                    'FirstIonizationEnergy',
                     'ElectronAffinity']
-    elif features == 'all' or features == ['all']:
+    elif features == ['all']:
         features = ['AtomicVolume',
-                    'AtomicWeight', 
-                    'BoilingT', 
+                    'AtomicWeight',
+                    'BoilingT',
                     'BoilingTemp',
-                    'BulkModulus', 
-                    'Column', 
-                    'CovalentRadius', 
+                    'BulkModulus',
+                    'Column',
+                    'CovalentRadius',
                     'Density',
-                    'ElectronAffinity', 
-                    'Electronegativity', 
-                    'FirstIonizationEnergy', 
-                    'FusionEnthalpy', 
-                    'GSbandgap', 
-                    'GSenergy_pa', 
+                    'ElectronAffinity',
+                    'Electronegativity',
+                    'FirstIonizationEnergy',
+                    'FusionEnthalpy',
+                    'GSbandgap',
+                    'GSenergy_pa',
                     'GSestBCClatcnt',
-                    'GSestFCClatcnt', 
-                    'GSmagmom', 
-                    'GSvolume_pa', 
-                    'HHIp', 
+                    'GSestFCClatcnt',
+                    'GSmagmom',
+                    'GSvolume_pa',
+                    'HHIp',
                     'HHIr',
-                    'HeatCapacityMass', 
-                    'HeatCapacityMolar', 
-                    'HeatFusion', 
+                    'HeatCapacityMass',
+                    'HeatCapacityMolar',
+                    'HeatFusion',
                     'ICSDVolume',
-                    'IsAlkali', 
-                    'IsDBlock', 
-                    'IsFBlock', 
-                    'IsMetal', 
+                    'IsAlkali',
+                    'IsDBlock',
+                    'IsFBlock',
+                    'IsMetal',
                     'IsMetalloid',
-                    'IsNonmetal', 
-                    'MeltingT', 
-                    'MendeleevNumber', 
+                    'IsNonmetal',
+                    'MeltingT',
+                    'MendeleevNumber',
                     'MiracleRadius',
-                    'NUnfilled', 
-                    'NValance', 
-                    'NdUnfilled', 
-                    'NdValence', 
-                    'NfUnfilled', 
-                    'NfValence', 
-                    'NpUnfilled', 
-                    'NpValence', 
-                    'NsUnfilled', 
+                    'NUnfilled',
+                    'NValance',
+                    'NdUnfilled',
+                    'NdValence',
+                    'NfUnfilled',
+                    'NfValence',
+                    'NpUnfilled',
+                    'NpValence',
+                    'NsUnfilled',
                     'NsValence',
-                    'Number', 
-                    'Polarizability', 
-                    'Row', 
-                    'ShearModulus', 
-                    'SpaceGroupNumber', 
-                    'Wigner', 
-                    'ZungerPP-r_d', 
-                    'ZungerPP-r_p', 
-                    'ZungerPP-r_pi', 
-                    'ZungerPP-r_s', 
+                    'Number',
+                    'Polarizability',
+                    'Row',
+                    'ShearModulus',
+                    'SpaceGroupNumber',
+                    'Wigner',
+                    'ZungerPP-r_d',
+                    'ZungerPP-r_p',
+                    'ZungerPP-r_pi',
+                    'ZungerPP-r_s',
                     'ZungerPP-r_sigma']
     elif not features:
         raise FeatureError('No Features Given, specify \'features\' kwarg')
@@ -163,7 +168,7 @@ def look_up(elements, weights, features='atomic'):
     else:
         not_valid = []
         for i in range(len(features)):
-            if os.path.isfile('tables/' + features[i] + '.txt'):
+            if os.path.isfile(sys.path[0] + '/tables/' + features[i] + '.txt'):
                 pass
             else:
                 not_valid.append(features[i])
@@ -178,10 +183,14 @@ def look_up(elements, weights, features='atomic'):
     for i in range(len(elements)):
         df_list.append(collect_values(elements[i], weights[i], features))
 
-    # combine the individual dataframes
-    df = pd.concat(df_list, keys=(x for x in range(len(df_list))))
+    return df_list
 
-    return df
+
+def combine_dfs(df_list):
+    '''
+    combine a list of individual dataframes
+    '''
+    return pd.concat(df_list, keys=(x for x in range(len(df_list))))
 
 
 def collect_values(elements, weights, features):
@@ -196,3 +205,27 @@ def collect_values(elements, weights, features):
     df = pd.DataFrame(output, columns=['Element', 'Weights'] + features)
 
     return df
+
+
+def statistics(df_list, features):
+    '''
+    generate common statistics to represent each composition in list
+    '''
+    stats = np.array(['Mean','Std','Minimum','Maximum','Range'])
+    stat_list = []
+    for i in range(len(df_list)):
+        values = df_list[i][features].values.astype(float)
+        weights = df_list[i]['Weights'].values.astype(float)
+
+        average = np.average(values, axis=0, weights=weights)
+        error = np.sqrt(np.average((values - average)**2, axis=0, weights=weights))
+        minimum = np.min(values, axis=0)
+        maximum = np.max(values, axis=0)
+        diff = maximum - minimum
+
+        data = np.stack((average,error,minimum,maximum,diff))
+        output = np.column_stack((stats,data))
+        df = pd.DataFrame(output, columns=['Statistics'] + features)
+        stat_list.append(df)
+
+    return stat_list
