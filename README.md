@@ -1,5 +1,5 @@
 # magpy
-This package has been written to to copy the behaviour of [MAGPIE](http://oqmd.org/static/analytics/magpie/doc/)'s elemental feature lookup for materials infomatics in Python.
+This package has been written to to copy the behaviour of [MAGPIE](http://oqmd.org/static/analytics/magpie/doc/)'s elemental feature lookup in Python.
 
 Example usage:
 
