@@ -230,3 +230,21 @@ def get_descriptors(df_list, features):
         stat_list.append(df)
 
     return stat_list
+
+def example():
+    feature_file = 'data/examples/features.dat'
+    composition_file = 'data/examples/compositions.dat' 
+    features = load_file(feature_file)
+    compositions = load_file(composition_file)
+    elements, weights = parse_input(compositions)
+
+    df_list = look_up(elements, weights, features=features)
+    df = combine_dfs(df_list)
+    print(df)
+
+
+    stats_list = get_descriptors(df_list, features)
+    stats = combine_dfs(stats_list)
+    print(stats)
+
+    pass
