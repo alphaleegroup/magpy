@@ -3,7 +3,7 @@ Elemental feature lookup for materials infomatics
 
 Example usage:
 
-''' python
+'''
 from magpie import parse_input, look_up
 
 input = ['NaCl', 'H2SO4', 'C2H4']
