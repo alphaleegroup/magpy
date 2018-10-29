@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="magpy",
-    version="0.0.1",
+    version="0.0.3",
     author="Rhys Goodall",
     author_email="reag2@cam.ac.uk",
     description="Chemical Feature Look-up",
@@ -18,4 +18,9 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
+
+    packages=['magpy'],
+    package_dir={'magpy': 'src/mypkg'},
+    package_data={'magpy': ['data/*.dat']},
+
 )

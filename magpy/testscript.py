@@ -40,7 +40,12 @@ def test(feature_file, composition_file):
     pass
 
 
-if __name__ == '__main__':
+def main():
     feature_file = sys.path[0] + '/featuretest.txt'
     composition_file = sys.path[0] + '/compositiontest.txt'
     test(feature_file, composition_file)
+
+
+
+if __name__ == '__main__':
+    main()
