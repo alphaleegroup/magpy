@@ -1,9 +1,6 @@
 Information about elemental property lookup tables. Most of this data was taken from Mathematica's elemental property data (sources described at http://reference.wolfram.com/mathematica/note/ElementDataSourceInformation.html). Modifications and, when not from Mathematica, original sources are listed.
 
 
-Abbreviations
-* This is the abbreviations for each element, provided for convenience of interpreting the other lookup tables
-
 AtomicVolume
 * Property: Volume of an atom of each element
 * Units: A^3 / atom
@@ -141,10 +138,6 @@ MiracleRadius
 * Units: pm
 * Source: Miracle et al., 2010. doi:10.1179/095066010X12646898728200
 
-n_ws^third
-* Property: Electron density at surface of Wigner-Sietz cell. Used in Miedema's model
-* Source: Cohesion in metals: transition metal alloys, (North-Holland, Amsterdam, 1988)
-
 NdUnfilled
 * Property: Number of unfilled d valence orbitals
 * Source: http://periodictable.com/Properties/A/ElectronConfigurationString.v.html
@@ -215,6 +208,10 @@ ShearModulus
 SpaceGroupNumber
 * Property: Space group of T=0K ground state structure
 * Source: Only structures from the ICSD were evaluated, Pm used OQMD groundstate in Spacegroup 194, which is only 4 meV/atom below 166. No ICSD structure
+
+Wigner
+* Property: Electron density at surface of Wigner-Sietz cell. Used in Miedema's model
+* Source: Cohesion in metals: transition metal alloys, (North-Holland, Amsterdam, 1988)
 
 ZungerPP-r_s
 * Property: Psuedopotential radius of s orbital
