@@ -33,7 +33,7 @@ def test(feature_file, composition_file):
     print(df)
 
 
-    stats_list = statistics(df_list, features)
+    stats_list = get_descriptors(df_list, features)
     stats = combine_dfs(stats_list)
     print(stats)
 

@@ -72,7 +72,7 @@ def parse_input(file):
     regex2 = r'([A-Z](?![0-9]|[a-z]))'
     subst = r'\g<1>1'
     for i in range(len(file)):
-        file[i] = re.sub(regex, subst, file[i])
+        file[i] = re.sub(regex, subst, file[i].rstrip())
         file[i] = re.sub(regex2, subst, file[i])
 
     elements = np.empty_like(file, dtype=object)
@@ -207,24 +207,27 @@ def collect_values(elements, weights, features):
     return df
 
 
-def statistics(df_list, features):
+def get_descriptors(df_list, features):
     '''
     generate common statistics to represent each composition in list
     '''
-    stats = np.array(['Mean','Std','Minimum','Maximum','Range'])
+    stats = np.array(['Mean', 'Std', 'Minimum', 'Maximum', 'Range'])
     stat_list = []
     for i in range(len(df_list)):
+        print(i)
+        print(df_list[i][features].values)
         values = df_list[i][features].values.astype(float)
         weights = df_list[i]['Weights'].values.astype(float)
 
         average = np.average(values, axis=0, weights=weights)
-        error = np.sqrt(np.average((values - average)**2, axis=0, weights=weights))
+        error = np.sqrt(np.average((values - average)
+                                   ** 2, axis=0, weights=weights))
         minimum = np.min(values, axis=0)
         maximum = np.max(values, axis=0)
         diff = maximum - minimum
 
-        data = np.stack((average,error,minimum,maximum,diff))
-        output = np.column_stack((stats,data))
+        data = np.stack((average, error, minimum, maximum, diff))
+        output = np.column_stack((stats, data))
         df = pd.DataFrame(output, columns=['Statistics'] + features)
         stat_list.append(df)
 
