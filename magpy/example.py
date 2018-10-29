@@ -23,7 +23,9 @@
 from magpy import *
 
 
-def test(feature_file, composition_file):
+def example():
+    feature_file = ''
+    composition_file = '' 
     features = load_file(feature_file)
     compositions = load_file(composition_file)
     elements, weights = parse_input(compositions)
@@ -39,13 +41,5 @@ def test(feature_file, composition_file):
 
     pass
 
-
-def main():
-    feature_file = sys.path[0] + '/featuretest.txt'
-    composition_file = sys.path[0] + '/compositiontest.txt'
-    test(feature_file, composition_file)
-
-
-
 if __name__ == '__main__':
-    main()
+    example()
