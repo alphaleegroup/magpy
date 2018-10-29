@@ -1,3 +1,4 @@
 LaCuO4
 K2MgO4
+La1.85Sr0.1Y0.05Cu0.9Ca0.1O4
 NaCl

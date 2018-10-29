@@ -2,7 +2,20 @@ import sys
 import re
 import pandas as pd
 import numpy as np
-from lookup import construct_dict, collect_values
+from lookup import look_up
+
+
+def load_file(file):
+    '''
+    loads file and returns a list, files should contain one composition per line
+
+    example:    LaCu04
+                K2MgO4
+                NaCl
+    '''
+    with open(file) as f:
+        lines = f.read().splitlines()
+    return lines
 
 
 def parse_input(file):
@@ -30,46 +43,33 @@ def parse_input(file):
 
     elements = np.empty_like(file, dtype=object)
     weights = np.empty_like(file, dtype=object)
+    regex3 = r'(\d+\.\d+)|(\d+)'
     for i in range(len(file)):
-        parsed = [j for j in re.split(r'(\d+\.\d+)|(\d+)', file[i]) if j]
+        parsed = [j for j in re.split(regex3, file[i]) if j]
         elements[i] = parsed[0::2]
         weights[i] = parsed[1::2]
     return elements, weights
 
 
-def load_file(file):
-    '''
-    loads file and returns a list, files should contain one composition per line
-
-    example:    LaCu04
-                K2MgO4
-                NaCl
-    '''
-    with open(file) as f:
-        lines = f.read().splitlines()
-    return lines
-
-
 def save_file(file, output='output.csv'):
     df = pd.DataFrame.from_records(file)
-    df.to_csv(output, index=False)
+    df.to_csv(output)
 
 
 def main(input_file):
-    load_file()
+    test = load_file(input_file)
+    elements, weights = parse_input(test)
+
+    df_list = []
+    for i in range(len(elements)):
+        df_list.append(look_up(elements[i], weights[i], features='atomic'))
+
+    df = pd.concat(df_list, keys=(x for x in range(len(df_list))))
+    print(df)
+    save_file(df)
     pass
 
 
 if __name__ == '__main__':
     # input_file = sys.argv[1]
-    test = load_file('testfile.txt')
-    elements, weights = parse_input(test)
-
-    df_list = []
-    for i in range(len(a)):
-        df_list.append(lookup(elements[i], weights[i], features='atomic'))
-
-    df = pd.concat(df_list, keys=(x for x in range(len(df_list))))
-    print(df)
-
-    # main(input_file)
+    main('testfile.txt')
