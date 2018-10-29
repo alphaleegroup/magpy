@@ -20,7 +20,8 @@ setuptools.setup(
     ],
 
     packages=['magpy'],
-    package_dir={'magpy': 'src/mypkg'},
-    package_data={'magpy': ['data/*.dat']},
+    package_dir={'magpy': 'src/'},
+    package_data={'magpy': ['data/tables/*.dat',
+                            'data/examples/*.dat']},
 
 )
