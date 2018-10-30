@@ -21,4 +21,25 @@
 # SOFTWARE.
 
 
-from .magpy import *
+import magpy
+
+
+def main():
+    feature_file = 'inputs/features.dat'
+    composition_file = 'inputs/compositions.dat'
+    features = magpy.load_file(feature_file)
+    compositions = magpy.load_file(composition_file)
+    elements, weights = magpy.parse_input(compositions)
+
+    df_list = magpy.look_up(elements, weights, features=features)
+    df = magpy.combine_dfs(df_list)
+    print(df, '\n')
+
+    stats_list = magpy.get_descriptors(df_list, features)
+    stats = magpy.combine_dfs(stats_list)
+    print(stats, '\n')
+
+    pass
+
+if __name__ == '__main__':
+    main()

@@ -12,16 +12,15 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/comprhys/magpy",
-    packages=setuptools.find_packages(),
+    packages=['magpy'],
+    package_dir={'magpy': 'magpy'},
+    package_data={'magpy': ['tables/*.dat']},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
 
-    packages=['magpy'],
-    package_dir={'magpy': 'src/'},
-    package_data={'magpy': ['data/tables/*.dat',
-                            'data/examples/*.dat']},
+
 
 )

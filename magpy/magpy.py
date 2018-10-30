@@ -25,6 +25,7 @@ import re
 import os.path
 import pandas as pd
 import numpy as np
+from pkg_resources import resource_filename, resource_exists
 
 
 class FeatureError(Exception):
@@ -89,7 +90,7 @@ def construct_dict(feature):
     '''
     construct dictionary from reference tables
     '''
-    with open('data/tables/' + feature + '.dat') as f:
+    with open(resource_filename('magpy', 'tables/'+feature+'.dat')) as f:
         d = dict(x.rstrip().split(None, 1) for x in f)
 
     return d
@@ -168,7 +169,7 @@ def look_up(elements, weights, features=['atomic']):
     else:
         not_valid = []
         for i in range(len(features)):
-            if os.path.isfile('data/tables/' + features[i] + '.dat'):
+            if resource_exists('magpy', 'tables/'+features[i]+'.dat'):
                 pass
             else:
                 not_valid.append(features[i])
@@ -222,7 +223,8 @@ def get_descriptors(df_list, features):
                                    ** 2, axis=0, weights=weights))
         minimum = np.min(values, axis=0)
         maximum = np.max(values, axis=0)
-        diff = maximum - minimum
+        diff    = maximum - minimum
+        # diff    = np.ptp(values, axis=0)
 
         data = np.stack((average, error, minimum, maximum, diff))
         output = np.column_stack((stats, data))
@@ -231,20 +233,3 @@ def get_descriptors(df_list, features):
 
     return stat_list
 
-def example():
-    feature_file = 'data/examples/features.dat'
-    composition_file = 'data/examples/compositions.dat' 
-    features = load_file(feature_file)
-    compositions = load_file(composition_file)
-    elements, weights = parse_input(compositions)
-
-    df_list = look_up(elements, weights, features=features)
-    df = combine_dfs(df_list)
-    print(df)
-
-
-    stats_list = get_descriptors(df_list, features)
-    stats = combine_dfs(stats_list)
-    print(stats)
-
-    pass
