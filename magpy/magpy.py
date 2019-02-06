@@ -19,7 +19,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 import sys
 import re
 import os.path
@@ -27,6 +26,7 @@ import pandas as pd
 import numpy as np
 from pkg_resources import resource_filename, resource_exists
 
+basic = ['CovalentRadius', 'Polarizability', 'Electronegativity', 'ElectronAffinity', 'FirstIonizationEnergy']
 
 class FeatureError(Exception):
     pass
@@ -96,64 +96,64 @@ def construct_dict(feature):
     return d
 
 
-def look_up(elements, weights, features=['atomic']):
+def look_up(elements, weights, features=['']):
     '''
     build a dataframe containing the elementwise results for desired features
 
-    allowed features = ['AtomicVolume',
-                        'AtomicWeight',
-                        'BoilingT',
-                        'BoilingTemp',
-                        'BulkModulus',
-                        'Column',
-                        'CovalentRadius',
-                        'Density',
-                        'ElectronAffinity',
-                        'Electronegativity',
-                        'FirstIonizationEnergy',
-                        'FusionEnthalpy',
-                        'GSbandgap',
-                        'GSenergy_pa',
-                        'GSestBCClatcnt',
-                        'GSestFCClatcnt',
-                        'GSmagmom',
-                        'GSvolume_pa',
-                        'HHIp',
-                        'HHIr',
-                        'HeatCapacityMass',
-                        'HeatCapacityMolar',
-                        'HeatFusion',
-                        'ICSDVolume',
-                        'IsAlkali',
-                        'IsDBlock',
-                        'IsFBlock',
-                        'IsMetal',
-                        'IsMetalloid',
-                        'IsNonmetal',
-                        'MeltingT',
-                        'MendeleevNumber',
-                        'MiracleRadius',
-                        'NUnfilled',
-                        'NValance',
-                        'NdUnfilled',
-                        'NdValence',
-                        'NfUnfilled',
-                        'NfValence',
-                        'NpUnfilled',
-                        'NpValence',
-                        'NsUnfilled',
-                        'NsValence',
-                        'Number',
-                        'Polarizability',
-                        'Row',
-                        'ShearModulus',
-                        'SpaceGroupNumber',
-                        'Wigner',
-                        'ZungerPP-r_d',
-                        'ZungerPP-r_p',
-                        'ZungerPP-r_pi',
-                        'ZungerPP-r_s',
-                        'ZungerPP-r_sigma']
+    allowed features =  AtomicVolume
+                        AtomicWeight
+                        BoilingT
+                        BoilingTemp
+                        BulkModulus
+                        Column
+                        CovalentRadius
+                        Density
+                        ElectronAffinity
+                        Electronegativity
+                        FirstIonizationEnergy
+                        FusionEnthalpy
+                        GSbandgap
+                        GSenergy_pa
+                        GSestBCClatcnt
+                        GSestFCClatcnt
+                        GSmagmom
+                        GSvolume_pa
+                        HHIp
+                        HHIr
+                        HeatCapacityMass
+                        HeatCapacityMolar
+                        HeatFusion
+                        ICSDVolume
+                        IsAlkali
+                        IsDBlock
+                        IsFBlock
+                        IsMetal
+                        IsMetalloid
+                        IsNonmetal
+                        MeltingT
+                        MendeleevNumber
+                        MiracleRadius
+                        NUnfilled
+                        NValance
+                        NdUnfilled
+                        NdValence
+                        NfUnfilled
+                        NfValence
+                        NpUnfilled
+                        NpValence
+                        NsUnfilled
+                        NsValence
+                        Number
+                        Polarizability
+                        Row
+                        ShearModulus
+                        SpaceGroupNumber
+                        Wigner
+                        ZungerPP-r_d
+                        ZungerPP-r_p
+                        ZungerPP-r_pi
+                        ZungerPP-r_s
+                        ZungerPP-r_sigma
     '''
     # ensure valid feature list
     

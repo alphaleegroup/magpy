@@ -26,8 +26,9 @@ import magpy
 
 def main():
     feature_file = 'inputs/features.dat'
-    composition_file = 'inputs/compositions.dat'
     features = magpy.load_file(feature_file)
+
+    composition_file = 'inputs/compositions.dat'
     compositions = magpy.load_file(composition_file)
     elements, weights = magpy.parse_input(compositions)
 
@@ -35,7 +36,7 @@ def main():
     df = magpy.combine_dfs(df_list)
     print(df, '\n')
 
-    stats_list = magpy.get_descriptors(df_list, features)
+    stats_list = magpy.get_descriptors(df_list, features=features)
     stats = magpy.combine_dfs(stats_list)
     print(stats, '\n')
 
