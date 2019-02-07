@@ -210,7 +210,12 @@ def get_descriptors(df_list, features):
     stats = np.array(['Mean', 'Std', 'Minimum', 'Maximum', 'Range'])
     stat_list = []
     for i in range(len(df_list)):
-        values = df_list[i][features].values.astype(float)
+        try:
+            values = df_list[i][features].values.astype(float)
+        except ValueError:
+            print(i)
+            print(df_list[i][features].values)
+            break
         weights = df_list[i]['Weights'].values.astype(float)
 
         average = np.average(values, axis=0, weights=weights)
