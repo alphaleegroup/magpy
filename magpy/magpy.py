@@ -28,6 +28,17 @@ from pkg_resources import resource_filename, resource_exists
 
 basic = ['CovalentRadius', 'Polarizability', 'Electronegativity', 'ElectronAffinity', 'FirstIonizationEnergy']
 
+complete = ['AtomicVolume',
+'AtomicWeight','BoilingT','BoilingTemp','BulkModulus','Column','CovalentRadius',
+'Density','ElectronAffinity','Electronegativity','FirstIonizationEnergy','FusionEnthalpy',
+'GSbandgap','GSenergy_pa','GSestBCClatcnt','GSestFCClatcnt','GSmagmom','GSvolume_pa',
+'HHIp','HHIr','HeatCapacityMass','HeatCapacityMolar','HeatFusion','ICSDVolume',
+'IsAlkali','IsDBlock','IsFBlock','IsMetal','IsMetalloid','IsNonmetal','MeltingT',
+'MendeleevNumber','MiracleRadius','NUnfilled','NValance','NdUnfilled','NdValence',
+'NfUnfilled','NfValence','NpUnfilled','NpValence','NsUnfilled','NsValence',
+'Number','Polarizability','Row','ShearModulus','SpaceGroupNumber','Wigner',
+'ZungerPP-r_d','ZungerPP-r_p','ZungerPP-r_pi','ZungerPP-r_s','ZungerPP-r_sigma']
+
 class FeatureError(Exception):
     pass
 
