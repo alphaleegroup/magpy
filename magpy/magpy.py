@@ -19,6 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
 import sys
 import re
 import os.path
@@ -26,25 +27,42 @@ import pandas as pd
 import numpy as np
 from pkg_resources import resource_filename, resource_exists
 
-basic = ['CovalentRadius', 'Polarizability', 'Electronegativity', 'ElectronAffinity', 'FirstIonizationEnergy']
+basic = [
+    "CovalentRadius",
+    "Polarizability",
+    "Electronegativity",
+    "ElectronAffinity",
+    "FirstIonizationEnergy",
+]
 
-complete = ['AtomicVolume',
-'AtomicWeight','BoilingT','BoilingTemp','BulkModulus','Column','CovalentRadius',
-'Density','ElectronAffinity','Electronegativity','FirstIonizationEnergy','FusionEnthalpy',
-'GSbandgap','GSenergy_pa','GSestBCClatcnt','GSestFCClatcnt','GSmagmom','GSvolume_pa',
-'HHIp','HHIr','HeatCapacityMass','HeatCapacityMolar','HeatFusion','ICSDVolume',
-'IsAlkali','IsDBlock','IsFBlock','IsMetal','IsMetalloid','IsNonmetal','MeltingT',
-'MendeleevNumber','MiracleRadius','NUnfilled','NValance','NdUnfilled','NdValence',
-'NfUnfilled','NfValence','NpUnfilled','NpValence','NsUnfilled','NsValence',
-'Number','Polarizability','Row','ShearModulus','SpaceGroupNumber','Wigner',
-'ZungerPP-r_d','ZungerPP-r_p','ZungerPP-r_pi','ZungerPP-r_s','ZungerPP-r_sigma']
+"""
+allowed features =  AtomicVolume,       AtomicWeight,           BoilingT,               
+                    BoilingTemp,        BulkModulus,            Column,             
+                    CovalentRadius,     Density,                ElectronAffinity,
+                    Electronegativity,  FirstIonizationEnergy,  FusionEnthalpy,
+                    GSbandgap,          GSenergy_pa,            GSestBCClatcnt,         
+                    GSestFCClatcnt,     GSmagmom,               GSvolume_pa,        
+                    HHIp,               HHIr,                   HeatCapacityMass,   
+                    HeatCapacityMolar,  HeatFusion,             ICSDVolume,
+                    IsAlkali,           IsDBlock,               IsFBlock,
+                    IsMetal,            IsMetalloid,            IsNonmetal,         
+                    MeltingT,           MendeleevNumber,        MiracleRadius,      
+                    NUnfilled,          NValance,               NdUnfilled,
+                    NdValence,          NfUnfilled,             NfValence,              
+                    NpUnfilled,         NpValence,              NsUnfilled,         
+                    NsValence,          Number,                 Polarizability,     
+                    Row,                ShearModulus,           SpaceGroupNumber,
+                    Wigner,             ZungerPP-r_d,           ZungerPP-r_p,           
+                    ZungerPP-r_pi,      ZungerPP-r_s,           ZungerPP-r_sigma
+"""
+
 
 class FeatureError(Exception):
     pass
 
 
 def load_file(file):
-    '''
+    """
     load file and return a list, files should contain one item per line
 
     example:    LaCu04
@@ -54,42 +72,46 @@ def load_file(file):
     or:         CovalentRadius
                 Polarizability
                 Electronegativity
-    '''
+    """
     with open(file) as f:
         compositions = f.read().splitlines()
     return compositions
 
 
-def save_file(df, output='output.csv'):
-    df.to_csv(output, header=True, index=True, index_label=[
-              'CompositionIndex', 'ElementIndex'])
+def save_file(df, output="output.csv"):
+    df.to_csv(
+        output,
+        header=True,
+        index=True,
+        index_label=["CompositionIndex", "ElementIndex"],
+    )
 
 
 def parse_input(file):
-    '''
+    """
     take an input composition string and return an array of elements
     and an array of stoichometric coefficients.
 
     example: La2Cu04 -> (La Cu O) and (2 1 4)
 
-    this is done in two stages, first formatting to ensure weights 
+    this is done in two stages, first formatting to ensure weights
     are explicate then parsing into sections:
 
     example: BaCu3 -> Ba1Cu3
 
     example: Ba1Cu3 -> (Ba Cu) & (1 3)
 
-    '''
-    regex = r'([A-Z][a-z](?![0-9]))'
-    regex2 = r'([A-Z](?![0-9]|[a-z]))'
-    subst = r'\g<1>1'
+    """
+    regex = r"([A-Z][a-z](?![0-9]))"
+    regex2 = r"([A-Z](?![0-9]|[a-z]))"
+    subst = r"\g<1>1"
     for i in range(len(file)):
         file[i] = re.sub(regex, subst, file[i].rstrip())
         file[i] = re.sub(regex2, subst, file[i])
 
     elements = np.empty_like(file, dtype=object)
     weights = np.empty_like(file, dtype=object)
-    regex3 = r'(\d+\.\d+)|(\d+)'
+    regex3 = r"(\d+\.\d+)|(\d+)"
     for i in range(len(file)):
         parsed = [j for j in re.split(regex3, file[i]) if j]
         elements[i] = parsed[0::2]
@@ -98,90 +120,38 @@ def parse_input(file):
 
 
 def construct_dict(feature):
-    '''
+    """
     construct dictionary from reference tables
-    '''
-    with open(resource_filename('magpy', 'tables/'+feature+'.dat')) as f:
+    """
+    with open(resource_filename("magpy", "tables/" + feature + ".dat")) as f:
         d = dict(x.rstrip().split(None, 1) for x in f)
 
     return d
 
 
-def look_up(elements, weights, features=['']):
-    '''
+def look_up(elements, weights, features=[""]):
+    """
     build a dataframe containing the elementwise results for desired features
 
-    allowed features =  AtomicVolume
-                        AtomicWeight
-                        BoilingT
-                        BoilingTemp
-                        BulkModulus
-                        Column
-                        CovalentRadius
-                        Density
-                        ElectronAffinity
-                        Electronegativity
-                        FirstIonizationEnergy
-                        FusionEnthalpy
-                        GSbandgap
-                        GSenergy_pa
-                        GSestBCClatcnt
-                        GSestFCClatcnt
-                        GSmagmom
-                        GSvolume_pa
-                        HHIp
-                        HHIr
-                        HeatCapacityMass
-                        HeatCapacityMolar
-                        HeatFusion
-                        ICSDVolume
-                        IsAlkali
-                        IsDBlock
-                        IsFBlock
-                        IsMetal
-                        IsMetalloid
-                        IsNonmetal
-                        MeltingT
-                        MendeleevNumber
-                        MiracleRadius
-                        NUnfilled
-                        NValance
-                        NdUnfilled
-                        NdValence
-                        NfUnfilled
-                        NfValence
-                        NpUnfilled
-                        NpValence
-                        NsUnfilled
-                        NsValence
-                        Number
-                        Polarizability
-                        Row
-                        ShearModulus
-                        SpaceGroupNumber
-                        Wigner
-                        ZungerPP-r_d
-                        ZungerPP-r_p
-                        ZungerPP-r_pi
-                        ZungerPP-r_s
-                        ZungerPP-r_sigma
-    '''
+    """
     # ensure valid feature list
-    
+
     if not features:
-        raise FeatureError('No Features Given, specify \'features\' kwarg')
-    elif features == ['']:
-        raise FeatureError('No Features Given, specify \'features\' kwarg')
+        raise FeatureError("No Features Given, specify 'features' kwarg")
+    elif features == [""]:
+        raise FeatureError("No Features Given, specify 'features' kwarg")
     else:
         not_valid = []
         for i in range(len(features)):
-            if resource_exists('magpy', 'tables/'+features[i]+'.dat'):
+            if resource_exists("magpy", "tables/" + features[i] + ".dat"):
                 pass
             else:
                 not_valid.append(features[i])
         if not_valid:
-            message = 'Specified Features (' + \
-                ', '.join(not_valid) + ') are not supported'
+            message = (
+                "Specified Features (" + ", ".join(not_valid) +
+                ") are not supported"
+            )
             raise FeatureError(message)
         pass
 
@@ -194,31 +164,33 @@ def look_up(elements, weights, features=['']):
 
 
 def combine_dfs(df_list):
-    '''
+    """
     combine a list of individual dataframes
-    '''
+    """
     return pd.concat(df_list, keys=(x for x in range(len(df_list))))
 
 
 def collect_values(elements, weights, features):
-    '''
+    """
     collect values from dictionaries
-    '''
+    """
     output = np.column_stack((elements, weights))
     for feature in features:
         d = construct_dict(feature)
         values = np.vectorize(d.get)(elements)
         output = np.column_stack((output, values))
-    df = pd.DataFrame(output, columns=['Element', 'Weights'] + features)
+    df = pd.DataFrame(output, columns=["Element", "Weights"] + features)
 
     return df
 
 
-def get_descriptors(df_list, features):
-    '''
+def get_descriptors(df_list, features, descriptors):
+    """
     generate common statistics to represent each composition in list
-    '''
-    stats = np.array(['Mean', 'Std', 'Minimum', 'Maximum', 'Range'])
+
+    features array of str
+    descriptors array of str
+    """
     stat_list = []
     for i in range(len(df_list)):
         try:
@@ -227,20 +199,60 @@ def get_descriptors(df_list, features):
             print(i)
             print(df_list[i][features].values)
             break
-        weights = df_list[i]['Weights'].values.astype(float)
+        weights = df_list[i]["Weights"].values.astype(float)
 
-        average = np.average(values, axis=0, weights=weights)
-        error = np.sqrt(np.average((values - average)
-                                   ** 2, axis=0, weights=weights))
-        minimum = np.min(values, axis=0)
-        maximum = np.max(values, axis=0)
-        diff    = maximum - minimum
-        # diff    = np.ptp(values, axis=0)
-
-        data = np.stack((average, error, minimum, maximum, diff))
-        output = np.column_stack((stats, data))
-        df = pd.DataFrame(output, columns=['Statistics'] + features)
+        chosen, data = eval_descriptors(values, weights, descriptors)
+        output = np.column_stack((chosen, data))
+        df = pd.DataFrame(output, columns=["Statistics"] + features)
         stat_list.append(df)
 
     return stat_list
 
+
+def eval_descriptors(values, weights, descriptors):
+    """
+    """
+
+    operations = ["wmean", "wstd", "wskew", "wkurtosis", "max", "min", "range"]
+
+    chosen = np.intersect1d(descriptors, operations)
+
+    generate = FeatureStatistics()
+    generate.values = values
+    generate.weights = weights
+    data = generate.dispatch(chosen)
+
+    return chosen, data
+
+
+class FeatureStatistics:
+    def __init__(self):
+        self.values = np.empty(0)
+        self.weights = np.empty(0)
+
+    def dispatch(self, operations):
+        data = np.empty((0, self.values.shape[1]))
+        for operation in operations:
+            method_name = "eval_" + str(operation)
+            method = getattr(self, method_name)
+            data = np.vstack((data, method()))
+        return data
+
+    def eval_wmean(self):
+        return np.average(self.values, axis=0, weights=self.weights)
+
+    def eval_wstd(self):
+        average = self.eval_wmean()
+        return np.sqrt(
+            np.average((self.values - average) ** 2,
+                       axis=0, weights=self.weights)
+        )
+
+    def eval_max(self):
+        return np.max(self.values, axis=0)
+
+    def eval_min(self):
+        return np.min(self.values, axis=0)
+
+    def eval_range(self):
+        return np.ptp(self.values, axis=0)
