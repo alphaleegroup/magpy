@@ -27,14 +27,6 @@ import pandas as pd
 import numpy as np
 from pkg_resources import resource_filename, resource_exists
 
-basic = [
-    "CovalentRadius",
-    "Polarizability",
-    "Electronegativity",
-    "ElectronAffinity",
-    "FirstIonizationEnergy",
-]
-
 """
 allowed features =  AtomicVolume,       AtomicWeight,           BoilingT,               
                     BoilingTemp,        BulkModulus,            Column,             
@@ -56,8 +48,22 @@ allowed features =  AtomicVolume,       AtomicWeight,           BoilingT,
                     ZungerPP-r_pi,      ZungerPP-r_s,           ZungerPP-r_sigma
 """
 
+basic = [
+    "CovalentRadius",
+    "Polarizability",
+    "Electronegativity",
+    "ElectronAffinity",
+    "FirstIonizationEnergy",
+]
+
+allowed_ops = ["wmean", "wstd", "wskew", "wkurtosis", "max", "min", "range"]
+
 
 class FeatureError(Exception):
+    pass
+
+
+class OperationError(Exception):
     pass
 
 
@@ -212,11 +218,14 @@ def get_descriptors(df_list, features, descriptors):
 def eval_descriptors(values, weights, descriptors):
     """
     """
+    diff = np.setdiff1d(descriptors, allowed_ops)
+    if diff:
+        message = (
+            "Specified Features ({}) are not supported".format(diff)
+        )
+        raise OperationError(message)
 
-    operations = ["wmean", "wstd", "wskew", "wkurtosis", "max", "min", "range"]
-
-    chosen = np.intersect1d(descriptors, operations)
-
+    chosen = np.intersect1d(descriptors, allowed_ops)
     generate = FeatureStatistics()
     generate.values = values
     generate.weights = weights
