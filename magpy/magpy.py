@@ -204,7 +204,7 @@ def get_descriptors(df_list, features, descriptors):
         except ValueError:
             print(i)
             print(df_list[i][features].values)
-            break
+            raise(ValueError)
         weights = df_list[i]["Weights"].values.astype(float)
 
         chosen, data = eval_descriptors(values, weights, descriptors)
@@ -251,11 +251,19 @@ class FeatureStatistics:
         return np.average(self.values, axis=0, weights=self.weights)
 
     def eval_wstd(self):
-        average = self.eval_wmean()
-        return np.sqrt(
-            np.average((self.values - average) ** 2,
-                       axis=0, weights=self.weights)
-        )
+        '''
+        note as we have exact composition strings we do not reduce the ddof 
+        by 1 as we have the entire population.
+        '''
+        wmean = self.eval_wmean()
+        return np.sqrt(np.average((self.values - wmean) ** 2,
+                                  axis=0, weights=self.weights))
+
+    def eval_geometric(self):
+        return np.exp(np.sum(self.weights*np.log(self.values), axis=0)/np.sum(self.weights, axis=0))
+
+    def eval_harmonic(self):
+        return np.sum(self.weights, axis=0)/np.sum(self.weights/self.values, axis=0)
 
     def eval_max(self):
         return np.max(self.values, axis=0)
