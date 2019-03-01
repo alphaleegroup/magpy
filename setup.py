@@ -12,8 +12,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/comprhys/magpy",
-    packages=['magpy'],
-    package_dir={'magpy': 'magpy'},
+    packages=setuptools.find_packages(),
     package_data={'magpy': ['tables/*.dat']},
     classifiers=[
         "Programming Language :: Python :: 3",

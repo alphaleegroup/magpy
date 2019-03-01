@@ -3,7 +3,7 @@ import re
 import os.path
 import pandas as pd
 import numpy as np
-from .utils import *
+from pkg_resources import resource_filename, resource_exists
 
 """
 allowed features =  AtomicVolume,       AtomicWeight,           BoilingT,               
@@ -109,6 +109,16 @@ def look_up(elements, weights, features=[""]):
         df_list.append(collect_values(elements[i], weights[i], features))
 
     return df_list
+
+
+def construct_dict(feature):
+    """
+    construct dictionary from reference tables
+    """
+    with open(resource_filename("magpy", "tables/" + feature + ".dat")) as f:
+        d = dict(x.rstrip().split(None, 1) for x in f)
+
+    return d
 
 
 def collect_values(elements, weights, features):

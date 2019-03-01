@@ -1,1 +1,2 @@
-from .magpy import *
+from .core import *
+import magpy.utils

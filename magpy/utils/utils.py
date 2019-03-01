@@ -1,4 +1,3 @@
-from pkg_resources import resource_filename, resource_exists
 import pandas as pd
 
 def load_file(file):
@@ -26,14 +25,6 @@ def save_file(df, output="output.csv"):
         index_label=["CompositionIndex", "ElementIndex"],
     )
 
-def construct_dict(feature):
-    """
-    construct dictionary from reference tables
-    """
-    with open(resource_filename("magpy", "tables/" + feature + ".dat")) as f:
-        d = dict(x.rstrip().split(None, 1) for x in f)
-
-    return d
 
 def combine_dfs(df_list):
     """
