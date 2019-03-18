@@ -13,7 +13,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/comprhys/magpy",
     packages=setuptools.find_packages(),
-    package_data={'magpy': ['tables/*.dat']},
+    package_data={'magpy': ['tables/*.csv']},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

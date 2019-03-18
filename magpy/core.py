@@ -3,6 +3,7 @@ import re
 import os.path
 import pandas as pd
 import numpy as np
+import functools
 from pkg_resources import resource_filename, resource_exists
 
 """
@@ -91,7 +92,7 @@ def look_up(elements, weights, features=[""]):
     else:
         not_valid = []
         for i in range(len(features)):
-            if resource_exists("magpy", "tables/" + features[i] + ".dat"):
+            if resource_exists("magpy", "tables/" + features[i] + ".csv"):
                 pass
             else:
                 not_valid.append(features[i])
@@ -110,15 +111,14 @@ def look_up(elements, weights, features=[""]):
 
     return df_list
 
-
+@functools.lru_cache(maxsize=60, typed=False)
 def construct_dict(feature):
     """
     construct dictionary from reference tables
     """
-    with open(resource_filename("magpy", "tables/" + feature + ".dat")) as f:
-        d = dict(x.rstrip().split(None, 1) for x in f)
-
-    return d
+    f = resource_filename("magpy", "tables/" + feature + ".csv") 
+    print(f)
+    return pd.read_csv(f, header=None, index_col=0, squeeze=True).to_dict()
 
 
 def collect_values(elements, weights, features):
