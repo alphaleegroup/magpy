@@ -57,7 +57,6 @@ def parse_input(file):
     are explicate then parsing into sections:
 
     example: BaCu3 -> Ba1Cu3
-
     example: Ba1Cu3 -> (Ba Cu) & (1 3)
 
     """
@@ -171,18 +170,16 @@ def eval_descriptors(values, weights, descriptors):
         raise OperationError(message)
 
     chosen = np.intersect1d(descriptors, allowed_ops)
-    generate = FeatureStatistics()
-    generate.values = values
-    generate.weights = weights
+    generate = FeatureStatistics(values, weights)
     data = generate.dispatch(chosen)
 
     return chosen, data
 
 
 class FeatureStatistics:
-    def __init__(self):
-        self.values = np.empty(0)
-        self.weights = np.empty(0)
+    def __init__(self, values=np.empty(0), weights=np.empty(0)):
+        self.values = values
+        self.weights = weights
 
     def dispatch(self, operations):
         data = np.empty((0, self.values.shape[1]))
