@@ -1,217 +1,104 @@
-import sys
-import re
-import os.path
-import pandas as pd
+import json
 import numpy as np
-import functools
-from pkg_resources import resource_filename, resource_exists
+from . import parse
 
-"""
-allowed features =  AtomicVolume,       AtomicWeight,           BoilingT,               
-                    BoilingTemp,        BulkModulus,            Column,             
-                    CovalentRadius,     Density,                ElectronAffinity,
-                    Electronegativity,  FirstIonizationEnergy,  FusionEnthalpy,
-                    GSbandgap,          GSenergy_pa,            GSestBCClatcnt,         
-                    GSestFCClatcnt,     GSmagmom,               GSvolume_pa,        
-                    HHIp,               HHIr,                   HeatCapacityMass,   
-                    HeatCapacityMolar,  HeatFusion,             ICSDVolume,
-                    IsAlkali,           IsDBlock,               IsFBlock,
-                    IsMetal,            IsMetalloid,            IsNonmetal,         
-                    MeltingT,           MendeleevNumber,        MiracleRadius,      
-                    NUnfilled,          NValance,               NdUnfilled,
-                    NdValence,          NfUnfilled,             NfValence,              
-                    NpUnfilled,         NpValence,              NsUnfilled,         
-                    NsValence,          Number,                 Polarizability,     
-                    Row,                ShearModulus,           SpaceGroupNumber,
-                    Wigner,             ZungerPP-r_d,           ZungerPP-r_p,           
-                    ZungerPP-r_pi,      ZungerPP-r_s,           ZungerPP-r_sigma
-"""
-
-basic = [
-    "CovalentRadius",
-    "Polarizability",
-    "Electronegativity",
-    "ElectronAffinity",
-    "FirstIonizationEnergy",
-]
-
-allowed_ops = ["wmean", "wstd", "wskew", "wkurtosis", "max", "min", "range"]
-
-
-class FeatureError(Exception):
-    pass
-
-
-class OperationError(Exception):
-    pass
-
-
-def parse_input(file):
+def descriptors(materials, embedding_file, operations=["wmean","wstd"]):
     """
-    take an input composition string and return an array of elements
-    and an array of stoichometric coefficients.
-
-    example: La2Cu04 -> (La Cu O) and (2 1 4)
-
-    this is done in two stages, first formatting to ensure weights
-    are explicate then parsing into sections:
-
-    example: BaCu3 -> Ba1Cu3
-    example: Ba1Cu3 -> (Ba Cu) & (1 3)
-
+    he
     """
-    regex = r"([A-Z][a-z](?![0-9]))"
-    regex2 = r"([A-Z](?![0-9]|[a-z]))"
-    subst = r"\g<1>1"
-    for i in range(len(file)):
-        file[i] = re.sub(regex, subst, file[i].rstrip())
-        file[i] = re.sub(regex2, subst, file[i])
+    featuriser = Featuriser(embedding_file)
+    statistics = Statistics(operations)
 
-    elements = np.empty_like(file, dtype=object)
-    weights = np.empty_like(file, dtype=object)
-    regex3 = r"(\d+\.\d+)|(\d+)"
-    for i in range(len(file)):
-        parsed = [j for j in re.split(regex3, file[i]) if j]
-        elements[i] = parsed[0::2]
-        weights[i] = parsed[1::2]
-    return elements, weights
+    descriptors_list = []
+    for material in materials:
+        elements, weights = parse.parse_composition(material)
+        print(elements, weights)
+        atom_features = atom_descriptors(elements, featuriser)
+        material_features = material_descriptors(atom_features, weights, statistics)
+        descriptors_list.append(material_features)
 
+    features = np.vstack(descriptors_list)
 
-def look_up(elements, weights, features=[""]):
+    return features
+
+def atom_descriptors(elements, featuriser):
     """
-    build a dataframe containing the elementwise results for desired features
-
+    he
     """
-    # ensure valid feature list
+    atom_fea = np.vstack([featuriser.get_fea(element) for element in elements])
+    return atom_fea
 
-    if not features:
-        raise FeatureError("No Features Given, specify 'features' kwarg")
-    elif features == [""]:
-        raise FeatureError("No Features Given, specify 'features' kwarg")
-    else:
-        not_valid = []
-        for i in range(len(features)):
-            if resource_exists("magpy", "tables/" + features[i] + ".csv"):
-                pass
-            else:
-                not_valid.append(features[i])
-        if not_valid:
-            message = (
-                "Specified Features (" + ", ".join(not_valid) +
-                ") are not supported"
-            )
-            raise FeatureError(message)
-        pass
-
-    # lookup features for the different compositions
-    df_list = []
-    for i in range(len(elements)):
-        df_list.append(collect_values(elements[i], weights[i], features))
-
-    return df_list
-
-@functools.lru_cache(maxsize=60, typed=False)
-def construct_dict(feature):
+def material_descriptors(features, weights, statistics):
     """
-    construct dictionary from reference tables
+    he
     """
-    f = resource_filename("magpy", "tables/" + feature + ".csv") 
-    print(f)
-    return pd.read_csv(f, header=None, index_col=0, squeeze=True).to_dict()
+    material_fea = statistics.dispatch(features, weights)
+    return  material_fea
 
-
-def collect_values(elements, weights, features):
+class Statistics(object):
     """
-    collect values from dictionaries
+    Statistics object
     """
-    output = np.column_stack((elements, weights))
-    for feature in features:
-        d = construct_dict(feature)
-        values = np.vectorize(d.get)(elements)
-        output = np.column_stack((output, values))
-    df = pd.DataFrame(output, columns=["Element", "Weights"] + features)
+    def __init__(self, operations):
+        self.operations = operations
 
-    return df
-
-
-def get_descriptors(df_list, features, descriptors):
-    """
-    generate common statistics to represent each composition in list
-
-    features array of str
-    descriptors array of str
-    """
-    stat_list = []
-    for i in range(len(df_list)):
-        try:
-            values = df_list[i][features].values.astype(float)
-        except ValueError:
-            print(i)
-            print(df_list[i][features].values)
-            raise(ValueError)
-        weights = df_list[i]["Weights"].values.astype(float)
-
-        chosen, data = eval_descriptors(values, weights, descriptors)
-        output = np.column_stack((chosen, data))
-        df = pd.DataFrame(output, columns=["Statistics"] + features)
-        stat_list.append(df)
-
-    return stat_list
-
-
-def eval_descriptors(values, weights, descriptors):
-    """
-    """
-    diff = np.setdiff1d(descriptors, allowed_ops)
-    if diff:
-        message = (
-            "Specified Features ({}) are not supported".format(diff)
-        )
-        raise OperationError(message)
-
-    chosen = np.intersect1d(descriptors, allowed_ops)
-    generate = FeatureStatistics(values, weights)
-    data = generate.dispatch(chosen)
-
-    return chosen, data
-
-
-class FeatureStatistics:
-    def __init__(self, values=np.empty(0), weights=np.empty(0)):
-        self.values = values
-        self.weights = weights
-
-    def dispatch(self, operations):
-        data = np.empty((0, self.values.shape[1]))
-        for operation in operations:
+    def dispatch(self, features, weights):
+        data_list = []
+        for operation in self.operations:
             method_name = "eval_" + str(operation)
             method = getattr(self, method_name)
-            data = np.vstack((data, method()))
+            stat = method(features, weights)
+            data_list.append(stat)
+        data = np.hstack(data_list)
         return data
 
-    def eval_wmean(self):
-        return np.average(self.values, axis=0, weights=self.weights)
+    def eval_wmean(self, features, weights):
+        return np.average(features, axis=0, weights=weights)
 
-    def eval_wstd(self):
-        '''
-        note as we have exact composition strings we do not reduce the ddof 
-        by 1 as we have the entire population.
-        '''
-        wmean = self.eval_wmean()
-        return np.sqrt(np.average((self.values - wmean) ** 2,
-                                  axis=0, weights=self.weights))
+    def eval_wstd(self, features, weights):
+        wmean = self.eval_wmean(features, weights)
+        return np.sqrt(np.average((features - wmean) ** 2, axis=0, weights=weights))
 
-    def eval_geometric(self):
-        return np.exp(np.sum(self.weights*np.log(self.values), axis=0)/np.sum(self.weights, axis=0))
+    def eval_geometric(self, features, weights):
+        return np.exp(np.sum(weights*np.log(features), axis=0)/np.sum(weights, axis=0))
 
-    def eval_harmonic(self):
-        return np.sum(self.weights, axis=0)/np.sum(self.weights/self.values, axis=0)
+    def eval_harmonic(self, features, weights):
+        return np.sum(weights, axis=0)/np.sum(weights/features, axis=0)
 
-    def eval_max(self):
-        return np.max(self.values, axis=0)
+    def eval_max(self, features, weights):
+        return np.max(features, axis=0)
 
-    def eval_min(self):
-        return np.min(self.values, axis=0)
+    def eval_min(self, features, weights):
+        return np.min(features, axis=0)
 
-    def eval_range(self):
-        return np.ptp(self.values, axis=0)
+    def eval_range(self, features, weights):
+        return np.ptp(features, axis=0)
+
+
+class Featuriser(object):
+    """
+    Lookup dict object
+    """
+    def __init__(self, embedding_file):
+        with open(embedding_file) as f:
+            self.embedding = json.load(f)
+        self.allowed_types = set(self.embedding.keys())
+
+    def get_fea(self, key):
+        assert key in self.allowed_types, "{} wasn't allowed".format(key)
+        return self.embedding[key]
+
+    def get_dict(self):
+        return self.embedding
+
+def load_file(file):
+    """
+    load file and return a list, files should contain one item per line
+
+    example:    LaCu04
+                K2MgO4
+                NaCl
+    """
+    with open(file) as f:
+        compositions = f.read().splitlines()
+    return compositions

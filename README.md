@@ -1,5 +1,5 @@
-# Magpy
-This package has been written to to copy the behaviour of [MAGPIE](http://oqmd.org/static/analytics/magpie/doc/)'s elemental feature lookup in Python.
+# Elembed
+This package has been written to provide a quick and way to featurise composition strings using embedding dictionaries. We provide several possible embeddings in json format inside the notebooks folder.
 
 ### Installation Instructions
 

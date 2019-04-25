@@ -1,2 +1,1 @@
-from .core import *
-import magpy.utils
+from . import parse, core
