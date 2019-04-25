@@ -1,4 +1,4 @@
-# Elembed
+# Magpy
 This package has been written to provide a quick and way to featurise composition strings using embedding dictionaries. We provide several possible embeddings in json format inside the notebooks folder.
 
 ### Installation Instructions
