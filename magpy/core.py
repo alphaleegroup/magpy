@@ -12,7 +12,6 @@ def descriptors(materials, embedding_file, operations=["wmean","wstd"]):
     descriptors_list = []
     for material in materials:
         elements, weights = parse.parse_composition(material)
-        print(elements, weights)
         atom_features = atom_descriptors(elements, featuriser)
         material_features = material_descriptors(atom_features, weights, statistics)
         descriptors_list.append(material_features)
@@ -23,14 +22,30 @@ def descriptors(materials, embedding_file, operations=["wmean","wstd"]):
 
 def atom_descriptors(elements, featuriser):
     """
-    he
+    get feature vectors for the atoms
     """
     atom_fea = np.vstack([featuriser.get_fea(element) for element in elements])
     return atom_fea
 
+class Featuriser(object):
+    """
+    Lookup dict object
+    """
+    def __init__(self, embedding_file):
+        with open(embedding_file) as f:
+            self.embedding = json.load(f)
+        self.allowed_types = set(self.embedding.keys())
+
+    def get_fea(self, key):
+        assert key in self.allowed_types, "{} wasn't allowed".format(key)
+        return self.embedding[key]
+
+    def get_dict(self):
+        return self.embedding    
+
 def material_descriptors(features, weights, statistics):
     """
-    he
+    get feature vectors for the materials
     """
     material_fea = statistics.dispatch(features, weights)
     return  material_fea
@@ -74,22 +89,8 @@ class Statistics(object):
     def eval_range(self, features, weights):
         return np.ptp(features, axis=0)
 
-
-class Featuriser(object):
-    """
-    Lookup dict object
-    """
-    def __init__(self, embedding_file):
-        with open(embedding_file) as f:
-            self.embedding = json.load(f)
-        self.allowed_types = set(self.embedding.keys())
-
-    def get_fea(self, key):
-        assert key in self.allowed_types, "{} wasn't allowed".format(key)
-        return self.embedding[key]
-
-    def get_dict(self):
-        return self.embedding
+    def eval_sum(self, features, weights):
+        return np.average(features, axis=0, weights=weights)*np.sum(weights, axis=0)
 
 def load_file(file):
     """
