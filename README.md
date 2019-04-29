@@ -4,7 +4,7 @@ This package has been written to provide a quick and way to featurise compositio
 ### Installation Instructions
 
 ```
-git clone https://github.com/CompRhys/magpy.git
+git clone https://github.com/alphaleegroup/magpy.git
 cd magpy
 python setup.py sdist
 pip install -e .
